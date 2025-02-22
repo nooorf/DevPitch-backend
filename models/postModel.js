@@ -6,6 +6,8 @@ const postSchema = new mongoose.Schema({
     githubRepo: String,
     user: { type: mongoose.Schema.Types.ObjectId, ref: "users" }, 
     tags: [{ type: String, lowercase: true, trim: true }],
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }], 
+    views: { type: Number, default: 0 }, 
     createdAt: {
         type: Date,
         default: Date.now
