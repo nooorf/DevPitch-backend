@@ -26,6 +26,7 @@ app.get("/getusers", async (req, res) => {
     res.json(userData);
 });
 
+//update view count
 app.get("/posts/:id", async(req, res)=>{
     try{
         const post = await PostModel.findByIdAndUpdate(
@@ -40,6 +41,32 @@ app.get("/posts/:id", async(req, res)=>{
             return res.status(404).json({message: "Post not found"});
         }
         res.json(post);
+    }
+    catch(err){
+        console.log(err);
+    }
+})
+
+//update like count
+app.post("/posts/:id/like", async(req, res)=>{
+    try{
+        //github auth not yet set up. So, userId is passed in the body
+        //TODO: extract userId from auth token using middleware
+        const {userId} = req.body;
+        const post = await PostModel.findById(req.params.id);
+        if(!post){
+            return res.status(404).json({message: "Post not found"});
+        }
+
+        const index = post.likes.indexOf(userId);
+        if(index === -1){
+            post.likes.push(userId);
+        }
+        else{
+            post.likes.splice(index, 1);
+        }
+        await post.save();
+        res.json({likes: post.likes.length});
     }
     catch(err){
         console.log(err);
