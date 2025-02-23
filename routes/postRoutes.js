@@ -25,11 +25,9 @@ router.get("/:id", async(req, res)=>{
 })
 
 //update like count
-router.post("/:id/like", async(req, res)=>{
+router.post("/:id/like", authMiddleware, async(req, res)=>{
     try{
-        //github auth not yet set up. So, userId is passed in the body
-        //TODO: extract userId from auth token using middleware
-        const {userId} = req.body;
+        const userId = req.body.userId;
         const post = await PostModel.findById(req.params.id);
         if(!post){
             return res.status(404).json({message: "Post not found"});
