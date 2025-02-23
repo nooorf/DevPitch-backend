@@ -3,7 +3,7 @@ import UserModel from '../models/UserModel';
 
 const router = express.Router();
 
-router.get("/getusers", async (req, res) => {
+router.get("/", async (req, res) => {
     const userData = await UserModel.find();
     res.json(userData);
 });
