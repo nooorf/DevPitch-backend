@@ -6,7 +6,6 @@ const userSchema = new mongoose.Schema({
     email: {type: String, unique: true, required: true},
     profilePicture: {type: String, default: "https://via.placeholder.com/150"},
     bio: {type: String, default: "No bio provided"},
-    website: {type: String, default: "No website provided"},
     role: {type: String, enum: ["student", "moderator"], default: "student"},
     createdAt: {
         type: Date,
