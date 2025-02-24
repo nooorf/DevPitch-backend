@@ -3,6 +3,8 @@ import PostModel from "../models/postModel.js";
 
 const router = express.Router();
 
+//TODO: create verifytoken and verifymoderator middleware and route for user to delete their own posts
+//TODO: functionality for editing posts (only by the user who created the post)
 //update view count
 router.get("/:id", async(req, res)=>{
     try{
@@ -107,13 +109,12 @@ router.get("/reported", verifyToken, verifyModerator, async(req, res)=>{
     }
 })
 
-router.post("/delete", verifyToken, verifyModerator, async(req, res)=>{
+router.delete("/:id", verifyToken, verifyModerator, async(req, res)=>{
     try{
-        const post = await PostModel.findById(req.body.id);
+        const post = await PostModel.findByIdAndDelete(req.body.id);
         if(!post){
             return res.status(404).json({message: "Post not found"});
         }
-        await post.remove();
         res.json({message: "Post deleted successfully"});
     }
     catch(err){
