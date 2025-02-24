@@ -47,3 +47,30 @@ router.post("/:id/like", authMiddleware, async(req, res)=>{
         console.log(err);
     }
 })
+
+router.post("/create", authMiddleware, async(req, res)=>{
+    try{
+        const {title, slug, description, category, githubRepo, image, pitch, tags} = req.body;
+        if(!title || !slug || !description || !pitch || !category || !githubRepo){
+            return res.status(400).json({message: "Missing required fields"});}
+        const post = new PostModel({
+            title,
+            slug,
+            description,
+            category,
+            githubRepo,
+            image,
+            pitch,
+            user: req.user.userId,
+            tags,
+        });
+        await post.save();
+        res.status(200).json({message: "Post created successfully", post: newPost});
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).json({message: error.message});
+    }
+})
+
+export default router;
