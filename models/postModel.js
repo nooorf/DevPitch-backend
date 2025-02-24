@@ -12,6 +12,8 @@ const postSchema = new mongoose.Schema({
     tags: [{ type: String, lowercase: true, trim: true }],
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "users"}], 
     views: { type: Number, default: 0 }, 
+    reports: [{ type: mongoose.Schema.Types.ObjectId, ref: "users"}],
+    reportCount: { type: Number, default: 0 },
     createdAt: {
         type: Date,
         default: Date.now
