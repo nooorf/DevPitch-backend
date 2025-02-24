@@ -1,9 +1,10 @@
 import express from "express";
 import PostModel from "../models/postModel.js";
+import { verifyToken, verifyModerator } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-//TODO: create verifytoken and verifymoderator middleware and route for user to delete their own posts
+
 //TODO: functionality for editing posts (only by the user who created the post)
 //update view count
 router.get("/:id", async(req, res)=>{
@@ -17,7 +18,7 @@ router.get("/:id", async(req, res)=>{
         ).populate("user", "name githubUsername");
 
         if(!post){
-            return res.status(404).json({message: "Post not found"});
+            return res.status(404).json({error: "Post not found"});
         }
         res.json(post);
     }
@@ -27,9 +28,9 @@ router.get("/:id", async(req, res)=>{
 })
 
 //update like count
-router.post("/:id/like", authMiddleware, async(req, res)=>{
+router.post("/:id/like", verifyToken, async(req, res)=>{
     try{
-        const userId = req.body.userId;
+        const userId = req.user.userId;
         const post = await PostModel.findById(req.params.id);
         if(!post){
             return res.status(404).json({message: "Post not found"});
@@ -50,12 +51,12 @@ router.post("/:id/like", authMiddleware, async(req, res)=>{
     }
 })
 
-router.post("/create", authMiddleware, async(req, res)=>{
+router.post("/create", verifyToken, async(req, res)=>{
     try{
         const {title, description, category, githubRepo, image, pitch, tags} = req.body;
         if(!title || !description || !pitch || !category || !githubRepo){
             return res.status(400).json({message: "Missing required fields"});}
-        const post = new PostModel({
+        const newPost = new PostModel({
             title,
             description,
             category,
@@ -65,8 +66,8 @@ router.post("/create", authMiddleware, async(req, res)=>{
             user: req.user.userId,
             tags,
         });
-        await post.save();
-        res.status(200).json({message: "Post created successfully", post: newPost});
+        await newPost.save();
+        res.status(201).json({message: "Post created successfully", post: newPost});
     }
     catch(error){
         console.log(error);
@@ -74,9 +75,9 @@ router.post("/create", authMiddleware, async(req, res)=>{
     }
 });
 
-router.post("/:id/report", authMiddleware, async(req, res)=>{
+router.post("/:id/report", verifyToken, async(req, res)=>{
     try{
-        const {userId} = req.user;
+        const userId = req.user.userId;
         const post = await PostModel.findById(req.params.id);
         if(!post){
             return res.status(404).json({message: "Post not found"});
@@ -93,7 +94,7 @@ router.post("/:id/report", authMiddleware, async(req, res)=>{
     }
     catch(err){
         console.log(err);
-        res.status(400).json({err: err.message})
+        res.status(500).json({erorr: err.message})
     }
 })
 
@@ -105,13 +106,13 @@ router.get("/reported", verifyToken, verifyModerator, async(req, res)=>{
     }
     catch(err){
         console.log(err);
-        res.status(400).json({err: err.message});
+        res.status(500).json({error: err.message});
     }
 })
 
 router.delete("/:id", verifyToken, verifyModerator, async(req, res)=>{
     try{
-        const post = await PostModel.findByIdAndDelete(req.body.id);
+        const post = await PostModel.findByIdAndDelete(req.params.id);
         if(!post){
             return res.status(404).json({message: "Post not found"});
         }
@@ -119,6 +120,6 @@ router.delete("/:id", verifyToken, verifyModerator, async(req, res)=>{
     }
     catch(err){
         console.log(err);
-        res.status(400).json({err: err.message});}
+        res.status(500).json({error: err.message});}
     });
 export default router;
