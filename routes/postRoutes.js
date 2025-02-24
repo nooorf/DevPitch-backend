@@ -122,4 +122,37 @@ router.delete("/:id", verifyToken, verifyModerator, async(req, res)=>{
         console.log(err);
         res.status(500).json({error: err.message});}
     });
+
+    //allow users to edit their created posts
+    router.put("/:id/edit", verifyToken, async (req, res) => {
+        try {
+            const { title, description, category, githubRepo, image, pitch, tags } = req.body;
+    
+            const post = await PostModel.findById(req.params.id);
+            if (!post) {
+                return res.status(404).json({ message: "Post not found" });
+            }
+    
+            if (post.user.toString() !== req.user.userId) {
+                return res.status(403).json({ message: "Unauthorized: You can only edit your own posts" });
+            }
+    
+            post.title = title || post.title;
+            post.description = description || post.description;
+            post.category = category || post.category;
+            post.githubRepo = githubRepo || post.githubRepo;
+            post.image = image || post.image;
+            post.pitch = pitch || post.pitch;
+            post.tags = tags || post.tags;
+    
+            await post.save();
+            res.json({ message: "Post updated successfully", post });
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ error: err.message });
+        }
+    });
+    
+   
+    
 export default router;
