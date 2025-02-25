@@ -10,13 +10,21 @@ router.get(
   passport.authenticate("github", { failureRedirect: "/" }),
   (req, res) => {
     const { user, token } = req.user;
-    res.redirect(`http://localhost:3000/dashboard?token=${token}`);
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      sameSite: "none",
+    });
+    res.redirect(`http://localhost:3000/dashboard`);
   }
 );
 
 router.get("/logout", (req, res) => {
   req.logout(() => {
-    res.clearCookie("token");
+    res.clearCookie("authToken", {
+      httpOnly: true,
+      sameSite: "none",
+    });
+    res.json({ message: "Logged out" });
     res.redirect("http://localhost:3000");
   });
 });

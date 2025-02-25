@@ -4,8 +4,6 @@ import { verifyToken, verifyModerator } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-
-//TODO: functionality for editing posts (only by the user who created the post)
 //update view count
 router.get("/:id", async(req, res)=>{
     try{
