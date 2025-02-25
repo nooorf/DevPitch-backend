@@ -153,6 +153,24 @@ router.delete("/:id", verifyToken, verifyModerator, async(req, res)=>{
         }
     });
     
-   
+    //allow users to delete their own posts
+    router.delete("/:id/delete", verifyToken, async (req, res) => {
+        try {
+            const post = await PostModel.findById(req.params.id);
+            if (!post) {
+                return res.status(404).json({ message: "Post not found" });
+            }
+    
+            if (post.user.toString() !== req.user.userId) {
+                return res.status(403).json({ message: "Unauthorized: You can only delete your own posts" });
+            }
+    
+            await PostModel.findByIdAndDelete(req.params.id);
+            res.json({ message: "Post deleted successfully" });
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ error: err.message });
+        }
+    });
     
 export default router;
