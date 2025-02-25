@@ -172,5 +172,22 @@ router.delete("/:id", verifyToken, verifyModerator, async(req, res)=>{
             res.status(500).json({ error: err.message });
         }
     });
+    router.put("/:id", verifyToken, verifyModerator, async(req, res)=>{
+        try{
+            const post = await PostModel.findByIdAndUpdate(req.params.id);
+            if(!post){
+                return res.status(404).json({message: "Post not found"});
+            }
+            else{
+                post.reportCount = 0;
+                post.reports = [];
+                await post.save();
+                res.json({message: "Post reports cleared"});
+            }
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({error: err.message});}
+        });
     
 export default router;
