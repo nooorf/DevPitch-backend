@@ -1,8 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import UserModel from "./models/UserModel.js";
-import PostModel from "./models/postModel.js";
 import cookieParser from "cookie-parser";
 
 

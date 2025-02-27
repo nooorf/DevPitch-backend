@@ -170,6 +170,7 @@ router.delete("/:id", verifyToken, verifyModerator, async(req, res)=>{
             res.status(500).json({ error: err.message });
         }
     });
+    //allow moderator to review and keep post
     router.put("/:id", verifyToken, verifyModerator, async(req, res)=>{
         try{
             const post = await PostModel.findByIdAndUpdate(req.params.id);
@@ -186,6 +187,17 @@ router.delete("/:id", verifyToken, verifyModerator, async(req, res)=>{
         catch(err){
             console.log(err);
             res.status(500).json({error: err.message});}
-        });
+    });
+    //to fetch posts by user id
+    router.get("/users/:id/posts", async(req, res)=>{
+        try{
+            const posts = await PostModel.find({user: req.params.id});
+            res.json(posts);
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({error: err.message});
+        }
+    });
     
 export default router;
