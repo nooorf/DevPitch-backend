@@ -1,6 +1,6 @@
 import express from "express";
 import passport from "../auth/github.js";
-import UserModel from "../models/UserModel.js";
+import UserModel from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 import {verifyToken} from "../middleware/authMiddleware.js";
 
@@ -24,7 +24,7 @@ router.get(
       httpOnly: true,
       sameSite: "none",
     });
-    res.redirect(`http://localhost:3000/dashboard`);
+    res.redirect(`http://localhost:3000`);
   }
 );
 

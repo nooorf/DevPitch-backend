@@ -2,6 +2,9 @@ import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
+import cors from "cors";
+import passport from "passport";
+import "./auth/github.js";
 
 
 import authRoutes from "./routes/authRoutes.js";
