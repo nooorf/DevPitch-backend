@@ -4,6 +4,32 @@ import { verifyToken, verifyModerator } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+//get post based on query
+router.get("/", async(req, res)=>{
+    try{
+        const searchQuery = req.query.search || "";
+        let filter = {};
+        if(searchQuery){
+            filter = {
+                $or: [
+                    {title: {$regex: searchQuery, $options: "i"}},
+                    {description: {$regex: searchQuery, $options: "i"}},
+                    {category: {$regex: searchQuery, $options: "i"}},
+                    {tags: {$regex: searchQuery, $options: "i"}}
+                ]
+            }
+        }
+        const posts = await PostModel.find(filter)
+        .populate("user", "name githubUsername image")
+        .sort({createdAt: -1});
+        res.json(posts);
+    }
+    catch(err){
+        console.log("Error fetching posts: ", err);
+        res.status(500).json({error: err.message});
+    }
+});
+
 //update view count
 router.get("/:id", async(req, res)=>{
     try{
