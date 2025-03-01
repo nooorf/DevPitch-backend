@@ -1,6 +1,8 @@
 import express from "express";
 import passport from "../auth/github.js";
 import UserModel from "../models/UserModel.js";
+import jwt from "jsonwebtoken";
+import {verifyToken} from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -9,8 +11,15 @@ router.get("/github", passport.authenticate("github", { scope: ["user:email"] })
 router.get(
   "/github/callback",
   passport.authenticate("github", { failureRedirect: "/" }),
-  (req, res) => {
-    const { user, token } = req.user;
+  async (req, res) => {
+    const { user } = req.user;
+
+    if(!user) return res.status(401).json({message: "Authentication failed"});
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
     res.cookie("authToken", token, {
       httpOnly: true,
       sameSite: "none",
@@ -20,14 +29,14 @@ router.get(
 );
 
 router.get("/logout", (req, res) => {
-  req.logout(() => {
-    res.clearCookie("authToken", {
-      httpOnly: true,
-      sameSite: "none",
-    });
-    res.json({ message: "Logged out" });
-    res.redirect("http://localhost:3000");
+  req.logout();
+  res.clearCookie("authToken", {
+    httpOnly: true,
+    sameSite: "none",
   });
+  res.json({ message: "Logged out" });
+  res.redirect("http://localhost:3000");
+
 });
 
 router.get("/me", verifyToken, async (req, res) => {

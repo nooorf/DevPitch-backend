@@ -20,4 +20,5 @@ export const verifyModerator = (req, res, next) => {
   if(!req.user || req.user.role !== "moderator"){
     return res.status(403).json({message: "Forbidden - Moderator access only"});
   }
+  next();
 };
