@@ -16,31 +16,37 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
+        console.log("GitHub Profile:", profile);
+
         let user = await UserModel.findOne({ githubId: profile.id });
 
         if (!user) {
-          user = await UserModel.create({
+          user = new UserModel({
             githubId: profile.id,
             name: profile.displayName,
             githubUsername: profile.username,
             email: profile.emails?.[0]?.value || "",
             profilePicture: profile.photos?.[0]?.value || "",
           });
+          await user.save();
         }
 
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-          expiresIn: "7d",
-        });
+        const token = jwt.sign(
+          { userId: user._id, githubUsername: user.githubUsername },
+          process.env.JWT_SECRET,
+          { expiresIn: "7d" }
+        );
 
-        return done(null, { user, token });
+        console.log("Token generated printed from github.js:", token);
+
+        return done(null, { user, token }); 
       } catch (err) {
+        console.log("Error printed from github.js:", err);
         return done(err, null);
       }
     }
   )
 );
 
-passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((obj, done) => done(null, obj));
-
 export default passport;
+

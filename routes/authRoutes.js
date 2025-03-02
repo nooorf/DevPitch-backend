@@ -1,8 +1,6 @@
 import express from "express";
 import passport from "../auth/github.js";
-import UserModel from "../models/userModel.js";
-import jwt from "jsonwebtoken";
-import {verifyToken} from "../middleware/authMiddleware.js";
+import { verifyToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -10,44 +8,51 @@ router.get("/github", passport.authenticate("github", { scope: ["user:email"] })
 
 router.get(
   "/github/callback",
-  passport.authenticate("github", { failureRedirect: "/" }),
+  passport.authenticate("github", { session: false }),
   async (req, res) => {
-    const { user } = req.user;
+    try {
+      console.log("GitHub Callback req.user printed in authRoutes:", req.user); 
+      if (!req.user || !req.user.user || !req.user.token) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
 
-    if(!user) return res.status(401).json({message: "Authentication failed"});
+      const { user, token } = req.user; 
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+      res.cookie("authToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", 
+        sameSite: "none",
+      });
 
-    res.cookie("authToken", token, {
-      httpOnly: true,
-      sameSite: "none",
-    });
-    res.redirect(`http://localhost:3000`);
+      console.log("JWT Token Created:", token); 
+      res.redirect("http://localhost:3000");
+    } catch (err) {
+      console.error("JWT Error:", err);
+      res.status(500).json({ message: err.message });
+    }
   }
 );
 
 router.get("/logout", (req, res) => {
-  req.logout();
   res.clearCookie("authToken", {
     httpOnly: true,
     sameSite: "none",
   });
-  res.json({ message: "Logged out" });
-  res.redirect("http://localhost:3000");
 
+  res.json({ message: "Logged out" });
 });
 
 router.get("/me", verifyToken, async (req, res) => {
-  try{
+  try {
     const user = await UserModel.findById(req.user.userId).select("-password");
-    if(!user) return res.status(404).json({message: "User not found"});
+    if (!user) return res.status(404).json({ message: "User not found" });
+
     res.json(user);
-  }
-  catch(err){
-    console.err(err);
-    res.status(500).json({message: err.message});
+  } catch (err) {
+    console.error("Error in /me:", err);
+    res.status(500).json({ message: err.message });
   }
 });
+
 export default router;
+

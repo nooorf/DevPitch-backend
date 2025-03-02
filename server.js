@@ -6,7 +6,6 @@ import cors from "cors";
 import passport from "passport";
 import "./auth/github.js";
 
-
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
@@ -18,25 +17,32 @@ const app = express();
 const port = process.env.PORT || 5000;
 const mongoURI = process.env.MONGO_URI;
 
-mongoose.connect(mongoURI)
-    .then(() => {  
+mongoose
+  .connect(mongoURI)
+  .then(() => {
     console.log("Connected to MongoDB");
     app.listen(port, () => {
-        console.log(`Server is running on port ${port}`);
-      });
-})
-.catch((err) => {
+      console.log(`Server is running on port ${port}`);
+    });
+  })
+  .catch((err) => {
     console.log(err);
-});
+  });
 
 app.use(express.json());
-app.use(cookieParser())
-app.use(cors({origin: process.env.FRONTEND_URL, credentials: true}));
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true, 
+  })
+);
 app.use(passport.initialize());
 
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/posts", postRoutes);
+
 
 
 
