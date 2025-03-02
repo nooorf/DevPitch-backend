@@ -2,6 +2,7 @@
 import express from "express";
 import passport from "../auth/github.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
+import UserModel from "../models/userModel.js";
 
 const router = express.Router();
 
@@ -23,7 +24,7 @@ router.get(
       res.cookie("authToken", token, {
         httpOnly: true, 
         secure: false, 
-        sameSite: "None", 
+        sameSite: "Lax", 
       });
 
       console.log("Cookies sent:", res.getHeaders()["set-cookie"]);
@@ -41,7 +42,7 @@ router.get(
 router.get("/logout", (req, res) => {
   res.clearCookie("authToken", {
     httpOnly: true,
-    sameSite: "none",
+    sameSite: "Lax",
   });
 
   res.json({ message: "Logged out" });
