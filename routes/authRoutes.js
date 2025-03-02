@@ -45,7 +45,7 @@ router.get("/logout", (req, res) => {
     sameSite: "Lax",
   });
 
-  res.json({ message: "Logged out" });
+  res.redirect("http://localhost:3000");
 });
 
 router.get("/me", verifyToken, async (req, res) => {
