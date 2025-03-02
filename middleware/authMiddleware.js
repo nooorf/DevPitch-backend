@@ -2,22 +2,28 @@ import jwt from "jsonwebtoken";
 
 export const verifyToken = (req, res, next) => {
   try {
-    console.log(req.cookies.authToken);
-    console.log(req.headers.authorization);
+    console.log("Cookies received:", req.cookies); 
+    const token =
+    req.cookies["authToken"] ||
+      req.headers.authorization?.split(" ")[1];
 
-    const token = req.cookies.authToken || req.headers.authorization?.split(" ")[1];
+    console.log("Token extracted:", token); 
 
-  if (!token) {
-    return res.status(401).json({ message: "Unauthorized - No token provided" });
-  }
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized - No token provided" });
+    }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; 
+    console.log("Decoded token:", decoded); 
+
+    req.user = decoded;
     next();
   } catch (error) {
+    console.error("JWT verification error:", error);
     return res.status(401).json({ message: "Unauthorized - Invalid token" });
   }
 };
+
 
 export const verifyModerator = (req, res, next) => {
   if(!req.user || req.user.role !== "moderator"){

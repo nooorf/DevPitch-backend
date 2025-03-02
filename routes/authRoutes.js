@@ -1,3 +1,4 @@
+
 import express from "express";
 import passport from "../auth/github.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
@@ -11,27 +12,31 @@ router.get(
   passport.authenticate("github", { session: false }),
   async (req, res) => {
     try {
-      console.log("GitHub Callback req.user printed in authRoutes:", req.user); 
+      console.log("GitHub Callback req.user:", req.user);
+
       if (!req.user || !req.user.user || !req.user.token) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const { user, token } = req.user; 
+      const { user, token } = req.user;
 
       res.cookie("authToken", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production", 
-        sameSite: "none",
+        httpOnly: true, 
+        secure: false, 
+        sameSite: "None", 
       });
 
-      console.log("JWT Token Created:", token); 
-      res.redirect("http://localhost:3000");
+      console.log("Cookies sent:", res.getHeaders()["set-cookie"]);
+      console.log("JWT Token Created and Set in Cookie:", token);
+      
+      res.redirect("http://localhost:3000"); 
     } catch (err) {
       console.error("JWT Error:", err);
       res.status(500).json({ message: err.message });
     }
   }
 );
+
 
 router.get("/logout", (req, res) => {
   res.clearCookie("authToken", {
