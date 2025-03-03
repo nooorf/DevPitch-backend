@@ -1,6 +1,7 @@
 import express from "express";
 import PostModel from "../models/postModel.js";
 import { verifyToken, verifyModerator } from "../middleware/authMiddleware.js";
+import slugify from "slugify";
 
 const router = express.Router();
 
@@ -75,29 +76,46 @@ router.post("/:id/like", verifyToken, async(req, res)=>{
     }
 })
 
-router.post("/create", verifyToken, async(req, res)=>{
-    try{
-        const {title, description, category, githubRepo, image, pitch, tags} = req.body;
-        if(!title || !description || !pitch || !category || !githubRepo){
-            return res.status(400).json({message: "Missing required fields"});}
+router.post("/create", verifyToken, async(req, res) => {
+    try {
+        console.log("Request body:", req.body);
+
+        const { title, description, category, githubRepo, image, pitch, tags } = req.body;
+
+        if (!title || !description || !pitch || !category || !githubRepo) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        let slug = slugify(title, { lower: true, strict: true });
+        let uniqueSlug = slug;
+        let count = 1;
+        while (await PostModel.findOne({ slug: uniqueSlug })) {
+            uniqueSlug = `${slug}-${count}`;
+            count++;
+        }
         const newPost = new PostModel({
             title,
             description,
             category,
+            slug: uniqueSlug,
             githubRepo,
             image,
             pitch,
             user: req.user.userId,
             tags,
         });
+
+        console.log("New post before save:", newPost);
         await newPost.save();
-        res.status(201).json({message: "Post created successfully", post: newPost});
-    }
-    catch(error){
-        console.log(error);
-        res.status(500).json({error: error.message});
+        console.log("Post saved successfully:", newPost);
+
+        res.status(201).json({ message: "Post created successfully", post: newPost });
+    } catch (error) {
+        console.error("Error saving post:", error);
+        res.status(500).json({ error: error.message });
     }
 });
+
 
 router.post("/:id/report", verifyToken, async(req, res)=>{
     try{

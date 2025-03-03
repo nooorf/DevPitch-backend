@@ -19,18 +19,5 @@ const postSchema = new mongoose.Schema({
         default: Date.now
     }
 });
-postSchema.pre("save", async function(next) {
-    if (this.isModified("title")|| this.isNew) {
-        let slug = slugify(this.title, { lower: true, strict: true });
-        let uniqueSlug = slug;
-        let count =1;
-        while(await mongoose.models.posts.findOne({slug: uniqueSlug})){
-            uniqueSlug = `${slug}-${count}`;
-            count++;
-        }
-        this.slug = uniqueSlug;
-    }
-    next();
-});
-const PostModel = mongoose.model("posts", postSchema);
+const PostModel = mongoose.models.posts || mongoose.model("posts", postSchema);
 export default PostModel;
