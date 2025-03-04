@@ -45,8 +45,9 @@ router.get("/:id", async(req, res)=>{
 });
 
 //update view count
-router.get("/:id", async(req, res)=>{
+router.get("/views/:id", async(req, res)=>{
     try{
+        console.log("backend view update route running")
         const post = await PostModel.findByIdAndUpdate(
             req.params.id,
             {
