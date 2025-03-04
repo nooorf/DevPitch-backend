@@ -30,6 +30,19 @@ router.get("/", async(req, res)=>{
         res.status(500).json({error: err.message});
     }
 });
+router.get("/:id", async(req, res)=>{
+    try{
+        const post = await PostModel.findById(req.params.id).populate("user", "name githubUsername");
+        if(!post){
+            return res.status(404).json({error: "Post not found"});
+        }
+        res.json(post);
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).json({error: err.message});
+    }
+});
 
 //update view count
 router.get("/:id", async(req, res)=>{
