@@ -32,7 +32,7 @@ router.get("/", async(req, res)=>{
 });
 router.get("/:id", async(req, res)=>{
     try{
-        const post = await PostModel.findById(req.params.id).populate("user", "name githubUsername");
+        const post = await PostModel.findById(req.params.id).populate("user", "name githubUsername profilePicture");
         if(!post){
             return res.status(404).json({error: "Post not found"});
         }
