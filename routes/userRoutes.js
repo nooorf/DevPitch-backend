@@ -1,11 +1,24 @@
 import express from 'express';
 import UserModel from '../models/userModel.js';
+import PostModel from '../models/postModel.js';
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
     const userData = await UserModel.find();
     res.json(userData);
+});
+
+//fetch user details by id
+router.get("/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await UserModel.findById(id);
+        res.status(200).json(user);
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: "Server error" });
+    }
 });
 
 //fetch posts based on user id
