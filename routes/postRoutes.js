@@ -21,7 +21,7 @@ router.get("/", async(req, res)=>{
             }
         }
         const posts = await PostModel.find(filter)
-        .populate("user", "name githubUsername image")
+        .populate("user", "name githubUsername profilePicture")
         .sort({createdAt: -1});
         res.json(posts);
     }
