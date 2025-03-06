@@ -21,7 +21,7 @@ router.get("/", async(req, res)=>{
             }
         }
         const posts = await PostModel.find(filter)
-        .populate("user", "name githubUsername image")
+        .populate("user", "name githubUsername profilePicture")
         .sort({createdAt: -1});
         res.json(posts);
     }
@@ -31,9 +31,35 @@ router.get("/", async(req, res)=>{
     }
 });
 
-//update view count
+router.get("/reported", verifyToken, verifyModerator, async(req, res)=>{
+    try{
+        const reportedPosts = await PostModel.find({reportCount: {$gt: 0}}).populate("user", "name githubUsername");
+        res.json(reportedPosts);
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).json({error: err.message});
+    }
+});
+
 router.get("/:id", async(req, res)=>{
     try{
+        const post = await PostModel.findById(req.params.id).populate("user", "name githubUsername profilePicture");
+        if(!post){
+            return res.status(404).json({error: "Post not found"});
+        }
+        res.json(post);
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).json({error: err.message});
+    }
+});
+
+//update view count
+router.get("/views/:id", async(req, res)=>{
+    try{
+        console.log("backend view update route running")
         const post = await PostModel.findByIdAndUpdate(
             req.params.id,
             {
@@ -116,41 +142,32 @@ router.post("/create", verifyToken, async(req, res) => {
     }
 });
 
-
-router.post("/:id/report", verifyToken, async(req, res)=>{
-    try{
+router.post("/:id/report", verifyToken, async (req, res) => {
+    try {
         const userId = req.user.userId;
         const post = await PostModel.findById(req.params.id);
-        if(!post){
-            return res.status(404).json({message: "Post not found"});
+
+        if (!post) {
+            console.log("Post not found");
+            return res.status(404).json({ message: "Post not found" });
         }
 
-        if(post.reports.includes(userId)){
-            return res.status(400).json({message: "You have already reported this post"});
+        if (post.reports.includes(userId)) {
+            console.log("User already reported this post");
+            return res.status(400).json({ message: "You have already reported this post" });
         }
 
         post.reports.push(userId);
-        post.reportCount +=1;
+        post.reportCount += 1;
         await post.save();
-        res.json({message: "Post reported successfully"});
-    }
-    catch(err){
-        console.log(err);
-        res.status(500).json({erorr: err.message})
-    }
-})
 
-//create middleware
-router.get("/reported", verifyToken, verifyModerator, async(req, res)=>{
-    try{
-        const reportedPosts = await PostModel.find({reportCount: {$gt: 0}}).populate("user", "name githubUsername");
-        res.json(reportedPosts);
+        console.log("Post reported successfully");
+        res.json({ message: "Post reported successfully" });
+    } catch (err) {
+        console.log("Server error:", err);
+        res.status(500).json({ error: err.message });
     }
-    catch(err){
-        console.log(err);
-        res.status(500).json({error: err.message});
-    }
-})
+});
 
 router.delete("/:id", verifyToken, verifyModerator, async(req, res)=>{
     try{

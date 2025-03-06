@@ -20,7 +20,10 @@ const port = process.env.PORT || 5000;
 const mongoURI = process.env.MONGO_URI;
 
 mongoose
-  .connect(mongoURI)
+  .connect(mongoURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
   .then(() => {
     console.log("Connected to MongoDB");
     app.listen(port, () => {
