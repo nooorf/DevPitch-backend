@@ -26,7 +26,7 @@ router.get("/:id/posts", async (req, res) => {
     try {
       const { id } = req.params;
       
-      const posts = await PostModel.find({ user: id }).populate("user", "name email"); 
+      const posts = await PostModel.find({ user: id }).populate("user", "name email profilePicture"); 
   
       res.status(200).json(posts);
     } catch (error) {
