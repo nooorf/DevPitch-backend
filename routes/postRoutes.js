@@ -30,6 +30,18 @@ router.get("/", async(req, res)=>{
         res.status(500).json({error: err.message});
     }
 });
+
+router.get("/reported", verifyToken, verifyModerator, async(req, res)=>{
+    try{
+        const reportedPosts = await PostModel.find({reportCount: {$gt: 0}}).populate("user", "name githubUsername");
+        res.json(reportedPosts);
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).json({error: err.message});
+    }
+});
+
 router.get("/:id", async(req, res)=>{
     try{
         const post = await PostModel.findById(req.params.id).populate("user", "name githubUsername profilePicture");
@@ -156,19 +168,6 @@ router.post("/:id/report", verifyToken, async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
-
-//create middleware
-router.get("/reported", verifyToken, verifyModerator, async(req, res)=>{
-    try{
-        const reportedPosts = await PostModel.find({reportCount: {$gt: 0}}).populate("user", "name githubUsername");
-        res.json(reportedPosts);
-    }
-    catch(err){
-        console.log(err);
-        res.status(500).json({error: err.message});
-    }
-})
 
 router.delete("/:id", verifyToken, verifyModerator, async(req, res)=>{
     try{
