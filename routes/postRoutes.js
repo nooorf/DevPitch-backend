@@ -32,6 +32,7 @@ router.get("/", async(req, res)=>{
 });
 
 router.get("/reported", verifyToken, verifyModerator, async(req, res)=>{
+    console.log("Middleware passed, reported route is running!");
     try{
         const reportedPosts = await PostModel.find({reportCount: {$gt: 0}}).populate("user", "name githubUsername");
         res.json(reportedPosts);

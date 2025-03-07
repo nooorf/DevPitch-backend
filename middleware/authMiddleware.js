@@ -2,7 +2,9 @@ import jwt from "jsonwebtoken";
 
 export const verifyToken = (req, res, next) => {
   try {
-    console.log("Cookies received:", req.cookies); 
+    console.log("Verify token middleware triggered");
+    console.log("Cookies received:", req.cookies);
+    console.log("Authorization header:", req.headers.authorization);
     const token =
     req.cookies["authToken"] ||
       req.headers.authorization?.split(" ")[1];
@@ -26,8 +28,18 @@ export const verifyToken = (req, res, next) => {
 
 
 export const verifyModerator = (req, res, next) => {
-  if(!req.user || req.user.role !== "moderator"){
-    return res.status(403).json({message: "Forbidden - Moderator access only"});
+  console.log("Verify moderator middleware triggered");
+
+  if (!req.user) {
+    console.log("No user found in request, rejecting access");
+    return res.status(403).json({ message: "Forbidden - No user found" });
   }
+
+  if (req.user.role !== "moderator") {
+    console.log("User is not a moderator, rejecting access");
+    return res.status(403).json({ message: "Forbidden - Moderator access only" });
+  }
+
+  console.log("User is a moderator, granting access");
   next();
 };
