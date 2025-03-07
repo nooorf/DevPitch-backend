@@ -2,6 +2,7 @@ import express from "express";
 import profuserModel from "../models/profuserModel.js";
 import nodemailer from "nodemailer";
 
+var useremail="";
 const router = express.Router();
 const otpStorage = {}; 
 
@@ -9,13 +10,9 @@ const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: "ridatayyab186@gmail.com", 
-    pass: process.env.EMAIL_PASSWORD,
+    pass: "lfrf nycd bcsb myba",
   },
 });
-
-const isValidEmail = (email) => {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-};
 
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -23,14 +20,6 @@ const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString()
 router.post("/send-otp", async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email || !isValidEmail(email)) {
-      return res.status(400).json({ msg: "Invalid email format" });
-    }
-    const existingUser = await profuserModel.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ msg: "Email is already registered" });
-    }
-
     const otp = generateOTP();
     otpStorage[email] = otp;
 
@@ -54,8 +43,8 @@ router.post("/send-otp", async (req, res) => {
 router.post("/verify-otp", async (req, res) => {
   try {
     const { email, otp } = req.body;
-    if (!email || !isValidEmail(email)) {
-      return res.status(400).json({ msg: "Invalid email format" });
+    if (!email) {
+      return res.status(400).json({ msg: "Provide email" });
     }
     if (!otpStorage[email]) {
       return res.status(400).json({ msg: "No OTP found for this email" });
@@ -63,12 +52,34 @@ router.post("/verify-otp", async (req, res) => {
     if (otpStorage[email] !== otp) {
       return res.status(400).json({ msg: "Invalid OTP" });
     }
-    const newUser = new profuserModel({ email });
-    await newUser.save();
-
+    useremail=email;
     delete otpStorage[email];
 
-    res.json({ msg: "Email verified and user registered successfully", user: newUser });
+    const existingUser = await profuserModel.findOne({ email: email });
+    const isExisting = existingUser ? true : false;
+    console.log(isExisting);
+
+    res.json({ msg: "Email verified", isExisting });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Server Error", error });
+  }
+});
+
+router.post("/saveuser", async (req, res) => {
+  try {
+    const { username, bio, pfp } = req.body;
+    console.log(useremail);
+
+    const existingUser = await profuserModel.findOne({ username: username });
+    if (existingUser) {
+      return res.status(400).json({ msg: "Username already exists. Please choose another." });
+    }
+
+    const newUser = new profuserModel({ email: useremail, username, bio, pfp });
+    await newUser.save();
+
+    res.json({ msg: "User registered successfully", user: newUser });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ message: "Server Error", error });
