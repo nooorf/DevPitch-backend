@@ -29,7 +29,7 @@ export const verifyToken = (req, res, next) => {
 
 export const verifyModerator = (req, res, next) => {
   console.log("Verify moderator middleware triggered");
-
+  console.log("User found in request to verifyModerator:", req.user);
   if (!req.user) {
     console.log("No user found in request, rejecting access");
     return res.status(403).json({ message: "Forbidden - No user found" });

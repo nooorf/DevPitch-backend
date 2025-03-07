@@ -32,7 +32,7 @@ passport.use(
         }
 
         const token = jwt.sign(
-          { userId: user._id, githubUsername: user.githubUsername },
+          { userId: user._id, githubUsername: user.githubUsername, role: user.role },
           process.env.JWT_SECRET,
           { expiresIn: "7d" }
         );
