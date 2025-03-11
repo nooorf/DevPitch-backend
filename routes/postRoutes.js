@@ -67,7 +67,7 @@ router.get("/views/:id", async(req, res)=>{
                 $inc: { views: 1 }
             },
             { new: true }
-        ).populate("user", "name githubUsername");
+        ).populate("user", "name githubUsername profilePicture");
 
         if(!post){
             return res.status(404).json({error: "Post not found"});
@@ -144,6 +144,9 @@ router.post("/create", verifyToken, async(req, res) => {
 });
 
 router.post("/:id/report", verifyToken, async (req, res) => {
+    if(req.user.role === "moderator"){
+        return res.status(403).json({message: "Moderators cannot report posts"});
+    }
     try {
         const userId = req.user.userId;
         const post = await PostModel.findById(req.params.id);
