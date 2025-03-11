@@ -144,6 +144,9 @@ router.post("/create", verifyToken, async(req, res) => {
 });
 
 router.post("/:id/report", verifyToken, async (req, res) => {
+    if(req.user.role === "moderator"){
+        return res.status(403).json({message: "Moderators cannot report posts"});
+    }
     try {
         const userId = req.user.userId;
         const post = await PostModel.findById(req.params.id);
