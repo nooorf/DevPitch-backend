@@ -9,7 +9,7 @@ const otpStorage = {};
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "ridatayyab186@gmail.com", 
+    user: process.env.EMAIL_USER, 
     pass: process.env.EMAIL_PASSWORD,
   },
 });
@@ -24,7 +24,7 @@ router.post("/send-otp", async (req, res) => {
     otpStorage[email] = otp;
 
     const mailOptions = {
-      from: "ridatayyab186@gmail.com",
+      from: process.env.EMAIL_USER,
       to: email,
       subject: "Email Verification Code",
       text: `Your verification code is: ${otp}`,
@@ -59,7 +59,25 @@ router.post("/verify-otp", async (req, res) => {
     const isExisting = existingUser ? true : false;
     console.log(isExisting);
 
-    res.json({ msg: "Email verified", isExisting });
+    if (isExisting) {
+      const token = jwt.sign(
+        { userId: existingUser._id, email: existingUser.email },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+      
+      // Send cookie for existing user
+      res.cookie("authToken", token, {
+        httpOnly: true,
+        secure: false, 
+        sameSite: "Lax",
+      });
+
+      return res.json({ msg: "Email verified", token });
+    }
+
+    //create new user
+    res.json({ msg: "Email verified", isExisting: false });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ message: "Server Error", error });
@@ -79,7 +97,21 @@ router.post("/saveuser", async (req, res) => {
     const newUser = new profuserModel({ email: useremail, username, bio, pfp });
     await newUser.save();
 
-    res.json({ msg: "User registered successfully", user: newUser });
+    //generate jwt to login new user
+    const token = jwt.sign(
+      { userId: newUser._id, email: newUser.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Set token in cookie
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: false, 
+      sameSite: "Lax",
+    });
+
+    res.json({ msg: "User registered successfully", user: newUser, token });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ message: "Server Error", error });
