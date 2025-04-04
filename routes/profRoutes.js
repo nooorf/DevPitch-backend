@@ -9,10 +9,11 @@ const otpStorage = {};
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "ridatayyab186@gmail.com", 
-    pass: process.env.EMAIL_PASSWORD,
+    user: "devpitch3@gmail.com", 
+    pass: "wsyn tdjq uyrk nnur",
   },
 });
+
 
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -24,14 +25,13 @@ router.post("/send-otp", async (req, res) => {
     otpStorage[email] = otp;
 
     const mailOptions = {
-      from: "ridatayyab186@gmail.com",
+      from: "devpitch3@gmail.com",
       to: email,
       subject: "Email Verification Code",
       text: `Your verification code is: ${otp}`,
     };
 
     await transporter.sendMail(mailOptions);
-
     res.json({ msg: "OTP sent successfully", email });
   } catch (error) {
     console.error(error.message);
