@@ -9,7 +9,7 @@ import "./auth/github.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
-import profRoutes from "./routes/profRoutes.js";
+import collaborationRoutes from "./routes/collaborationRoutes.js";
 
 
 dotenv.config();
@@ -51,8 +51,7 @@ app.use(passport.initialize());
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/posts", postRoutes);
-app.use("/profusers", profRoutes);
-
+app.use("/collaborations", collaborationRoutes);
 
 
 

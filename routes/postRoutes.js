@@ -1,5 +1,6 @@
 import express from "express";
 import PostModel from "../models/postModel.js";
+import CollaborationModel from "../models/collaborationModel.js";
 import { verifyToken, verifyModerator } from "../middleware/authMiddleware.js";
 import slugify from "slugify";
 
@@ -264,5 +265,43 @@ router.delete("/:id", verifyToken, verifyModerator, async(req, res)=>{
             res.status(500).json({error: err.message});
         }
     });
+
+    //Send Collaboration Request to post
+    router.post("/:id/collaborate", verifyToken, async (req, res) => {
+        try {
+            const {id: postId } = req.params;
+            const userId = req.user.userId; // From auth middleware
+
+            console.log("User ID:", userId);
+            console.log("Post ID:", postId);
+    
+            const { name, interest, expertise, linkedin, description } = req.body;
+
+            const post = await PostModel.findById(postId);
+            if (!post) return res.status(404).json({ error: "Post not found" });
+            if (post.user.toString() === userId.toString()) {
+                return res.status(400).json({ error: "You cannot request collaboration on your own post." });
+            }
+    
+            const newRequest = new CollaborationModel({
+                postId,
+                userId,//The one who requested
+                name,
+                interest,
+                expertise,
+                linkedin,
+                description
+            });
+    
+            await newRequest.save();
+    
+            res.status(201).json({ message: "Collaboration request sent successfully", request: newRequest });
+        } catch (err) {
+            console.error("Error sending collaboration request:", err);
+            res.status(500).json({ error: "Internal server error" });
+        }
+    });
+
+    
     
 export default router;
