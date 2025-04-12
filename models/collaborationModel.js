@@ -17,11 +17,6 @@ const collaborationRequestSchema = new mongoose.Schema(
     expertise: String,
     linkedin: String,
     description: String,
-    status: {
-      type: String,
-      enum: ["pending", "accepted", "rejected"],
-      default: "pending"
-    }
   },
   { timestamps: true }
 );
