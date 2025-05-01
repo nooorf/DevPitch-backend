@@ -9,7 +9,7 @@ const collaborationRequestSchema = new mongoose.Schema(
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "users", // The user who is requesting to collaborate
+      ref: "users", 
       required: true
     },
     name: String,
