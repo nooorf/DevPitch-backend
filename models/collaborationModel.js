@@ -15,7 +15,7 @@ const collaborationRequestSchema = new mongoose.Schema(
     name: String,
     interest: String,
     expertise: String,
-    linkedin: String,
+    github: String,
     description: String,
   },
   { timestamps: true }

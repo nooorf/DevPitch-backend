@@ -275,7 +275,7 @@ router.delete("/:id", verifyToken, verifyModerator, async(req, res)=>{
             console.log("User ID:", userId);
             console.log("Post ID:", postId);
     
-            const { name, interest, expertise, linkedin, description } = req.body;
+            const { name, interest, expertise, github, description } = req.body;
 
             const post = await PostModel.findById(postId);
             if (!post) return res.status(404).json({ error: "Post not found" });
@@ -289,7 +289,7 @@ router.delete("/:id", verifyToken, verifyModerator, async(req, res)=>{
                 name,
                 interest,
                 expertise,
-                linkedin,
+                github,
                 description
             });
     
